@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mask Example</title>
+<style>
+:root {
+    --aspect-ratio: 1920/1080; /* 设置宽高比例 */
+    --size: 1400px; 
+    --width: var(--size);
+    --height: calc(var(--size) / calc(1 * var(--aspect-ratio))); /* 使用 calc() 函数计算高度 */
+    --danmaku-item-height: 30px;
+    --danmaku-columns: 20;
+    --danmaku-rows: 30;
+    --danmaku-threshold: 0.7;
+}
+
+body {
+    margin: 0;
+}
+
+.container{
+    position: relative;
+    width: var(--width);
+    height: var(--height);
+    background-color:blue ;
+}
+
+#videoPlayer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#danmakuLayer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color:rgba(0, 0, 255, 0.5); /* 半透明蓝色 */
+    pointer-events: none;
+}
+
+</style>
+</head>
+<body>
+    <div class="container">
+        <!-- 底层视频 -->
+        <video id="videoPlayer" controls>
+            <source src="cxk.mp4" type="video/mp4">
+        </video>
+        <!-- 上层弹幕 -->
+        <div id="danmakuLayer"></div>
+    </div>
+    <script>
+        const danmakuMaskCount = 969
+        const videoDuration = 59
+        const danmakuMaskBlock = videoDuration * 1000 / danmakuMaskCount;
+        console.log(danmakuMaskBlock)
+
+        
+        // 获取视频和弹幕层
+        const videoPlayer = document.getElementById('videoPlayer');
+        const danmakuLayer = document.getElementById('danmakuLayer');
+    
+        var startTime = -1
+        var playtime = 1
+        function changeStartTime() {
+            const currentTime = videoPlayer.currentTime * 1000;
+            // 转换成 mask 图片下表
+            const maskOffset = currentTime / danmakuMaskBlock
+            const pointOffset = Math.floor(maskOffset)
+            startTime = pointOffset
+            playtime = startTime
+            console.log(maskOffset, pointOffset)
+        }
+        var timer = null
+
+
+        // 监听视频播放进度事件
+        videoPlayer.ontimeupdate = (event) => {
+            const currentTime = videoPlayer.currentTime * 1000;
+            // 转换成 mask 图片下表
+            const maskOffset = currentTime / danmakuMaskBlock
+            const pointOffset = Math.floor(maskOffset)
+            console.log(pointOffset)
+        };
+    
+        videoPlayer.onplay = (event) => {
+            console.log("play")
+            changeStartTime()
+            maskInterval(maskRefresh, danmakuMaskBlock)
+            // 53
+        }
+
+        videoPlayer.onpause = (event) => {
+            console.log("pause")
+            startTime = -1
+            playtime = 1
+        }
+
+        
+        // 每隔一段时间更改蒙版 URL
+        maskRefresh = function() {
+            if (startTime < 0)  {
+                return
+            }
+            // 得到蒙版图片
+            const maskName = "image_" + String(playtime).padStart(5, '0') + ".svg"
+            console.log("maskName", maskName)
+
+            // 根据视频播放时间切换不同的图片蒙版
+            danmakuLayer.style.mask = "url('svg/imgs/"+ maskName + "')"
+            danmakuLayer.style.maskRepeat = "no-repeat"
+            danmakuLayer.style.maskSize = "cover"
+            playtime ++
+        };
+
+        async function maskInterval(targetFunc, timeout) {
+            for(;;){
+                if (startTime < 0)  {
+                    break
+                }
+                await runWithTimeout(targetFunc, timeout)
+            }
+        }
+
+        function runWithTimeout(targetFunc, timeout) {
+            let startTime = Date.now();
+            return new Promise((resolve, reject) => {
+                targetFunc()
+                let executionTime = Date.now() - startTime;
+                let remainingTime = Math.max(timeout - executionTime, 0);
+                setTimeout(resolve, remainingTime);
+            });
+        }
+
+// // 使用示例
+// async function demo() {
+//     console.log('开始执行');
+//     await runWithTimeout(myFunction, 5000); // 运行函数，并设置超时时间为 2000ms
+//     console.log('执行完成');
+// }
+
+// // 要执行的函数
+// function myFunction() {
+//     // 假设这个函数需要执行一段时间
+//     return new Promise(resolve => {
+//         setTimeout(() => {
+//             console.log('函数执行完毕');
+//             resolve();
+//         }, 1000); // 这里设置一个较短的执行时间，以便测试
+//     });
+// }
+
+// // 执行示例
+// demo();
+
+
+    </script>
+</body>
+</html>

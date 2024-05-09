@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mask Example</title>
+<style>
+:root {
+    --aspect-ratio: 1920/1080; /* 设置宽高比例 */
+    --size: 1400px; 
+    --width: var(--size);
+    --height: calc(var(--size) / calc(1 * var(--aspect-ratio))); /* 使用 calc() 函数计算高度 */
+    --danmaku-item-height: 30px;
+    --danmaku-columns: 20;
+    --danmaku-rows: 30;
+    --danmaku-threshold: 0.7;
+}
+
+body {
+    margin: 0;
+}
+
+.container {
+    position: relative;
+    width: var(--width);
+    height: var(--height);
+    overflow: hidden;
+
+    background-image: url('cxk.png');
+    background-size: cover;
+}
+
+.barrage-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(var(--danmaku-columns), 1fr); /* 10列布局，每列等分剩余空间 */
+    grid-template-rows: repeat(var(--danmaku-rows), var(--danmaku-item-height)); /* 10行布局，每行高度为50px */
+    grid-gap: 1px; /* 网格间距 */
+    z-index: 2; /* 设置弹幕层的层级 */
+    overflow: hidden;
+    mask: url(
+        'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKIHdpZHRoPSI2NjhweCIgc3R5bGU9InRyYW5zZm9ybTpzY2FsZSgxLDEuMDAxKTsiIGhlaWdodD0iMzc1Ljc1cHgiIHZpZXdCb3g9IjAgMCAzMjAuMDAwMDAwIDE4MC4wMDAwMDAiCiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsMTgwLjAwMDAwMCkgc2NhbGUoMC4xMDAwMDAsLTAuMTAwMDAwKSIKZmlsbD0iIzAwMDAwMCIgc3Ryb2tlPSJub25lIj4KPHBhdGggZD0iTTAgOTA1IGwwIC04OTUgNTIwIDAgNTIwIDAgMCAyMyBjMCAxMiA5IDU4IDIwIDEwMiAxMSA0NCAyMCAxMDkgMjAgMTQ0IDAgOTAKMzAgMTc3IDExMiAzMjMgNyAxMyAzMSA0NiA1MyA3MyA1NCA2NyA4NSAxMjcgODUgMTYxIDAgMzggLTEwIDUxIC00MiA1OSAtMzkKMTAgLTg4IDY5IC04OCAxMDYgMCA4OCAxMjAgMjQwIDIxMSAyNjcgNzQgMjMgMTE0IDQxIDEyMCA1NCAzMSA2OSA0OSA5NSA3OAoxMTIgMzMgMTkgMzQgMTkgOTAgLTEgNDUgLTE2IDYwIC0yNyA3OCAtNTkgMjQgLTQyIDIzIC04MSAtMyAtMTE5IC0yMSAtMzAKLTE3IC03OCAxMiAtMTQxIDE0IC0zMSAyOCAtNzIgMzEgLTkwIDEwIC01OCAtMzcgLTE5NCAtODMgLTI0MSAtMTYgLTE3IC04Ci00MiA0MyAtMTMzIDc0IC0xMzUgODIgLTE3MSA4NCAtNDIwIGwzIC0yMjAgNjY4IDAgNjY4IDAgMCA4OTUgMCA4OTUgLTE2MDAgMAotMTYwMCAwIDAgLTg5NXoiLz4KPHBhdGggZD0iTTE0NTUgNTUwIGMtMjIgLTExIC01MCAtMTkgLTYyIC0yMCAtMTIgMCAtMjcgLTkgLTMzIC0yMCAtNiAtMTEgLTIxIC0yNSAtMzUKLTMyIC01MSAtMjggLTg3IC0xMTAgLTEzMCAtMjk4IC0xMCAtNDEgLTIxIC04NSAtMjYgLTk4IC01IC0xMyAtOSAtMzQgLTkgLTQ3CmwwIC0yNSAzMDUgMCAzMDUgMCAtNSAxMDIgYy0xMyAyNTUgLTE5IDI3OSAtNzUgMzMzIC0xNyAxNyAtNDEgMzkgLTUzIDUxIC0zMwozMiAtMTA0IDc0IC0xMjQgNzQgLTEwIC0xIC0zNiAtOSAtNTggLTIweiIvPgo8L2c+Cjwvc3ZnPgo='
+    );
+    mask-repeat: no-repeat;
+    mask-size: cover;
+    mask-composite: exclude;
+}
+
+/* 网格项样式 */
+.barrage{
+    /* background-color: #ccc; */
+    /* border: 1px solid #999; */
+    padding: 10px;
+    text-align: center;
+}
+
+
+</style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="barrage-layer">
+            <script>
+                const columns = getComputedStyle(document.documentElement).getPropertyValue('--danmaku-columns');
+                const rows = getComputedStyle(document.documentElement).getPropertyValue('--danmaku-rows');
+                const threshold = getComputedStyle(document.documentElement).getPropertyValue('--danmaku-threshold');
+                console.log(columns, rows)
+                // JavaScript 循环生成网格项
+                for (let i = 1; i <= rows; i++) {
+                    for (let j = 1; j <= columns; j++) {
+                        // 创建一个新的网格项
+                        const gridItem = document.createElement('div');
+                        gridItem.classList.add('barrage');
+                        const randomNum = Math.random();
+                        if (randomNum < threshold) { 
+                            // 设置为透明
+                            gridItem.style.setProperty('background-color', 'transparent');
+                        } else{
+                            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                            gridItem.style.setProperty('background-color', randomColor)
+                            // 设置网格项的内容为行号和列号，方便调试查看
+                            gridItem.textContent = `${i}, ${j}`;
+                        }
+                        // 将网格项添加到容器中
+                        document.querySelector('.barrage-layer').appendChild(gridItem);
+                    }
+                }
+                </script>
+        </div>
+    </div>
+
+</body>
+</html>

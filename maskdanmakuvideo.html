@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mask Example</title>
+<style>
+:root {
+    --aspect-ratio: 1920/1080; /* 设置宽高比例 */
+    --size: 1400px; 
+    --width: var(--size);
+    --height: calc(var(--size) / calc(1 * var(--aspect-ratio))); /* 使用 calc() 函数计算高度 */
+    --danmaku-item-height: 30px;
+    --danmaku-columns: 20;
+    --danmaku-rows: 30;
+    --danmaku-threshold: 0.7;
+}
+
+body {
+    margin: 0;
+}
+
+.container{
+    position: relative;
+    width: var(--width);
+    height: var(--height);
+    background-color:blue ;
+    overflow: hidden;
+}
+
+#videoPlayer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#danmakuLayer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    /* background-color:rgba(0, 0, 255, 0.5); 半透明蓝色 */
+    pointer-events: none;
+}
+
+.danmu {
+    position: absolute;
+    white-space: nowrap;
+}
+
+</style>
+</head>
+<body>
+    <div class="container">
+        <!-- 底层视频 -->
+        <video id="videoPlayer" controls>
+            <source src="cxk.mp4" type="video/mp4">
+        </video>
+        <!-- 上层弹幕 -->
+        <div id="danmakuLayer">
+        </div>
+    </div>
+    <script src="masksvg.js"></script>
+    <script src="binarysearchtree.js"></script>
+    <script>
+        const danmakuMaskCount = Object.keys(masksvgList).length
+        const videoDuration = 59
+        const danmakuMaskBlock = videoDuration * 1000 / danmakuMaskCount;
+        console.log(danmakuMaskBlock)
+
+        // 将 mask 帧转成二叉搜索树
+        const maskbst = objectToBST(masksvgList);
+
+        
+        // 获取视频和弹幕层
+        const videoPlayer = document.getElementById('videoPlayer');
+        const danmakuLayer = document.getElementById('danmakuLayer');
+
+        let shouldStopTask = false;
+
+        // 监听视频播放进度事件
+        videoPlayer.ontimeupdate = (event) => {
+            // const currentTime = videoPlayer.currentTime * 1000;
+            // // 转换成 mask 图片下表
+            // const maskOffset = currentTime / danmakuMaskBlock
+            // const pointOffset = Math.floor(maskOffset)
+        };
+    
+        videoPlayer.onplay = (event) => {
+            console.log("play")
+            // const currentTime = Math.floor(videoPlayer.currentTime * 1000);
+            // 转换成 mask 图片下表
+            // const maskOffset = currentTime / danmakuMaskBlock
+            // const pointOffset = Math.floor(maskOffset)
+            // startTime = pointOffset
+            // playtime = startTime
+            // console.log(maskOffset, pointOffset)
+            // console.log(currentTime)
+            shouldStopTask=true
+            AsyncRefreshMask()
+        }
+
+        videoPlayer.onpause = (event) => {
+            console.log("pause")
+            shouldStopTask = false
+        }
+
+        // 每隔一段时间更改蒙版 URL
+        function AsyncRefreshMask() {
+            function loop() {
+                if(!shouldStopTask){
+                    return
+                }
+                // 获取当前视频的时间
+                const currentTime = Math.floor(videoPlayer.currentTime * 1000);
+                const result = maskbst.findClosest(currentTime)
+                // console.log(currentTime, result.key)
+                var value = masksvgList[result.key];
+                // console.log("更换蒙版", value)
+                maskUpdate(value)
+                window.requestAnimationFrame(loop)
+            }
+            window.requestAnimationFrame(loop)
+            // // 定义一个递归函数，实现死循环
+            // while(shouldStopTask){
+            //     // 获取当前视频的时间
+            //     const currentTime = Math.floor(videoPlayer.currentTime * 1000);
+            //     if (masksvgList.hasOwnProperty(currentTime)) {
+            //         var value = masksvgList[currentTime];
+            //         console.log("更换蒙版", value)
+            //         maskUpdate(value)
+            //     }
+            //     // 等待1毫秒
+            //     await new Promise(resolve => setTimeout(resolve, 1)); 
+            //     ms ++
+            // }
+        }
+
+        maskUpdate = function(target) {
+            // 得到蒙版图片
+            // const maskName = "image_" + String(target).padStart(5, '0') + ".svg"
+            // const maskName = "image_" + String(target).padStart(5, '0') + ".svg"
+            // console.log(maskName)
+
+            // 根据视频播放时间切换不同的图片蒙版
+            // danmakuLayer.style.mask = "url('svg/imgs/"+ maskName + "')"
+            danmakuLayer.style.mask = "url('"+ target + "')"
+            danmakuLayer.style.maskRepeat = "no-repeat"
+            danmakuLayer.style.maskSize = "cover"
+        }
+    </script>
+    <script>
+        const danmakuposition = 500
+        // 获取容器元素
+        const container = document.getElementById('danmakuLayer');
+
+        // 生成随机颜色
+        function getRandomColor() {
+            return '#' + Math.floor(Math.random() * 16777215).toString(16);
+        }
+
+    
+        // 生成随机位置
+        function getRandomPosition() {
+            return Math.floor(Math.random() * danmakuposition);
+        }
+
+        function getRandomFont() {
+            const fonts = ['Arial', 'Verdana', 'Helvetica', 'Tahoma', 'Times New Roman', 'Courier New'];
+            return fonts[Math.floor(Math.random() * fonts.length)];
+        }
+
+        function getRandomSize(minSize, maxSize) {
+            return Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+        }
+    
+        // 创建弹幕元素
+        function createDanmu(text) {
+            const danmu = document.createElement('div');
+            danmu.classList.add('danmu');
+            danmu.style.color = getRandomColor();
+            danmu.style.fontSize =  getRandomSize(20, 350) + 'px';
+            danmu.style.fontFamily = getRandomFont();
+            danmu.style.top = getRandomPosition() + 'px';
+            danmu.textContent = text;
+            container.appendChild(danmu);
+            // 动画效果：让弹幕从右往左滑出
+            const animation = danmu.animate([
+                { left: container.clientWidth + 'px', opacity: 1 },
+                { left: '-' + danmu.clientWidth + 'px', opacity: 0 }
+            ], {
+                duration: 5000, // 动画持续时间（毫秒）
+                easing: 'linear', // 线性动画
+                delay: 0, // 延迟0毫秒开始动画
+                iterations: 1, // 动画播放次数
+                fill: 'both' // 动画结束时保持最后一帧的状态
+            });
+            // 动画完成后移除元素
+            animation.onfinish = () => {
+                danmu.remove();
+            };
+        }
+        function generateRandomString(minLength, maxLength) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            // 👍😏👏👍😃😆🥹🥹😇🙂😍😗😚😚🤓🥸🤩🥳😏😖😫
+            const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+            
+        // 模拟弹幕消息
+        setInterval(() => {
+            if(!shouldStopTask){
+                    return
+            }
+            // const messages = ['Hello', 'World', '弹幕效果', 'OpenAI', 'ChatGPT'];
+            const randomMessage = generateRandomString(20, 50)
+            createDanmu(randomMessage);
+        }, 100); // 每隔2秒生成一条弹幕消息
+    </script>
+</body>
+</html>
