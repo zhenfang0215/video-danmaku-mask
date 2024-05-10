@@ -38,7 +38,7 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    /* background-color:rgba(0, 0, 255, 0.5); 半透明蓝色 */
+    /* background-color:rgba(0, 0, 255, 0.5);  */
     pointer-events: none;
 }
 
@@ -78,23 +78,12 @@ body {
         let shouldStopTask = false;
 
         // 监听视频播放进度事件
-        videoPlayer.ontimeupdate = (event) => {
-            // const currentTime = videoPlayer.currentTime * 1000;
-            // // 转换成 mask 图片下表
-            // const maskOffset = currentTime / danmakuMaskBlock
-            // const pointOffset = Math.floor(maskOffset)
-        };
+        // videoPlayer.ontimeupdate = (event) => {
+        //     AsyncRefreshMask()
+        // };
     
         videoPlayer.onplay = (event) => {
             console.log("play")
-            // const currentTime = Math.floor(videoPlayer.currentTime * 1000);
-            // 转换成 mask 图片下表
-            // const maskOffset = currentTime / danmakuMaskBlock
-            // const pointOffset = Math.floor(maskOffset)
-            // startTime = pointOffset
-            // playtime = startTime
-            // console.log(maskOffset, pointOffset)
-            // console.log(currentTime)
             shouldStopTask=true
             AsyncRefreshMask()
         }
@@ -106,7 +95,7 @@ body {
 
         // 每隔一段时间更改蒙版 URL
         function AsyncRefreshMask() {
-            function loop() {
+            async function loop() {
                 if(!shouldStopTask){
                     return
                 }
@@ -118,31 +107,12 @@ body {
                 // console.log("更换蒙版", value)
                 maskUpdate(value)
                 window.requestAnimationFrame(loop)
+                // console.log("结束")
             }
             window.requestAnimationFrame(loop)
-            // // 定义一个递归函数，实现死循环
-            // while(shouldStopTask){
-            //     // 获取当前视频的时间
-            //     const currentTime = Math.floor(videoPlayer.currentTime * 1000);
-            //     if (masksvgList.hasOwnProperty(currentTime)) {
-            //         var value = masksvgList[currentTime];
-            //         console.log("更换蒙版", value)
-            //         maskUpdate(value)
-            //     }
-            //     // 等待1毫秒
-            //     await new Promise(resolve => setTimeout(resolve, 1)); 
-            //     ms ++
-            // }
         }
 
         maskUpdate = function(target) {
-            // 得到蒙版图片
-            // const maskName = "image_" + String(target).padStart(5, '0') + ".svg"
-            // const maskName = "image_" + String(target).padStart(5, '0') + ".svg"
-            // console.log(maskName)
-
-            // 根据视频播放时间切换不同的图片蒙版
-            // danmakuLayer.style.mask = "url('svg/imgs/"+ maskName + "')"
             danmakuLayer.style.mask = "url('"+ target + "')"
             danmakuLayer.style.maskRepeat = "no-repeat"
             danmakuLayer.style.maskSize = "cover"
@@ -178,7 +148,7 @@ body {
             const danmu = document.createElement('div');
             danmu.classList.add('danmu');
             danmu.style.color = getRandomColor();
-            danmu.style.fontSize =  getRandomSize(20, 350) + 'px';
+            danmu.style.fontSize =  getRandomSize(15, 50) + 'px';
             danmu.style.fontFamily = getRandomFont();
             danmu.style.top = getRandomPosition() + 'px';
             danmu.textContent = text;
@@ -216,9 +186,9 @@ body {
                     return
             }
             // const messages = ['Hello', 'World', '弹幕效果', 'OpenAI', 'ChatGPT'];
-            const randomMessage = generateRandomString(20, 50)
+            const randomMessage = generateRandomString(5, 10)
             createDanmu(randomMessage);
-        }, 100); // 每隔2秒生成一条弹幕消息
+        }, 150); // 每隔2秒生成一条弹幕消息
     </script>
 </body>
 </html>

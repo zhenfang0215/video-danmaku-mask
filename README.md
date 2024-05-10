@@ -1,19 +1,46 @@
 # video-danmaku-mask
 项目模仿了 bilibili 防挡弹幕效果
 
+## 目录结构
+```
+.
+├── binarysearchtree.js          // 二分查找法查询最匹配 mask
+├── cxk.mp4                      // 视频素材
+├── cxk.png              
+├── maskdanmakuvideo.html        // 主页面
+├── masksvg.js                   // 根据 bilibili 的请求生成的蒙版素材库 js 数据结构
+├── maskurltosvgbase64           // 根据 bilibili 的请求生成的蒙版素材库
+│   ├── Makefile
+│   ├── main.go                  // 解压 bilibili 响应结果,得到所有蒙版
+│   ├── maskurl.txt              // 指定 bilibili 请求 url
+│   ├── maskurltosvgbase64.py    // 根据 bilibili 请求 url 下载蒙版数据
+│   └── svgjs                    // 生成的 js 数据, 也就是 ./masksvg.js 文件的来源
+│       └── 1715149827.js
+└── svgurltoimage                // 根据 bilibili 请求生成 svg 图片
+    ├── base64tosvg.py
+    └── svg.txt
+```
+
 ## 使用
-先根据 bilibili 请求生成蒙版的帧数据, 进入 maskurltosvgbase64 目录, 执行
+### 直接看效果
+目前测试项目可以直接使用, 直接启动文件服务器即可, 比如本项目使用 python 方式
 ```
-make build
-```
-就会看到目录下生成了 svgjs 的目录, 把其中生成的文件移动到根目录下, 重命名成`masksvg.js`, 然后启动一个文件服务器,比如 使用 python 方式
-```
-python3 -m http.server 8001
+make run
 ```
 接着就可以在浏览器中,访问地址
 ```
 http://localhost:8001/maskdanmakuvideo.html
 ```
+### 重新生成蒙版数据
+如果需要重新生成蒙版数据,则需要先根据 bilibili 请求生成蒙版的帧数据, 进入 maskurltosvgbase64 目录, 执行
+```
+make build
+```
+就会看到目录下生成了 svgjs 的目录, 把其中生成的文件移动到根目录下, 重命名成`masksvg.js`即可
+
+### 换一个视频和蒙版
+需要自己修改代码
+
 
 ## bilibili 防挡弹幕.webmask 文件格式解压
 这里是直接参考了 [B-webmask](https://github.com/dreamCodeMan/B-webmask?tab=readme-ov-file) 的实现  
