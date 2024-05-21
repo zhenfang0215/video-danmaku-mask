@@ -1,5 +1,6 @@
 # video-danmaku-mask
 项目模仿了 bilibili 防挡弹幕效果
+![](./intro.gif)
 
 ## 目录结构
 ```
